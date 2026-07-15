@@ -1,79 +1,66 @@
-# Deploy VirtualClinicOS on Vercel
+# Deploy VirtualClinicOS on Vercel (MySQL)
 
-## Why `/login` showed a server error
+## Why login failed before
 
-Health check on the live site returns:
+Vercel cannot use local SQLite. You need a remote MySQL (or Postgres) `DATABASE_URL`.
 
-```json
-{ "db": "down", "storage": "down" }
-```
-
-Vercel’s filesystem is **ephemeral**. Local SQLite (`file:./dev.db`) and local `storage/` uploads **do not work** there. Clicking **Sign in** hit Prisma → crash → “This page couldn’t load”.
-
-Login can render; the **database is what’s broken**.
+This project is configured for **MySQL** via Prisma (`provider = "mysql"`).
 
 ---
 
-## Fix (required): Postgres
+## 1. Create free MySQL on Aiven
 
-### 1. Create a free Neon database
-1. Go to [https://neon.tech](https://neon.tech) → create project  
-2. Copy the connection string (`postgresql://...`)
+1. [Aiven console](https://console.aiven.io) → **Create service** → **MySQL** → plan **Free**
+2. Open the service → **Overview** → connection details  
+   - Use the **MySQL** tab (classic), **not MySQLx** (X Protocol — Prisma cannot use that)  
+3. Build:
 
-### 2. Point Prisma at Postgres (in this repo)
-
-In `prisma/schema.prisma` change:
-
-```prisma
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+```text
+mysql://avnadmin:YOUR_PASSWORD@YOUR_HOST:YOUR_PORT/defaultdb?sslaccept=strict
 ```
 
-(Local SQLite will stop working until you either use the same Neon URL locally or run Postgres locally.)
+Use `sslaccept=strict` (Prisma). SSL mode in the UI shows `REQUIRED` — that maps to this.
 
-Delete the old SQLite-only migration folder if you hit migrate conflicts, then:
+---
+
+## 2. Apply schema + seed (from your laptop)
+
+In `web/.env` set `DATABASE_URL` to the Aiven URI, then:
 
 ```bash
+npx prisma generate
 npx prisma db push
 npx prisma db seed
 ```
 
-(Run those against the Neon `DATABASE_URL`.)
+---
 
-### 3. Vercel → Project → Settings → Environment Variables
+## 3. Vercel environment variables
+
+Project → **Settings** → **Environment Variables**:
 
 | Name | Value |
 |------|--------|
-| `DATABASE_URL` | Neon `postgresql://...` connection string |
-| `AUTH_SECRET` | Long random string (e.g. `openssl rand -base64 32`) |
+| `DATABASE_URL` | Aiven MySQL URI (with `?sslaccept=strict`) |
+| `AUTH_SECRET` | Long random string |
 | `APP_URL` | `https://virtualclinicos.vercel.app` |
-| `EMAIL_DRIVER` | `console` (emails go to Vercel logs) |
+| `EMAIL_DRIVER` | `console` |
 
-Redeploy after saving env vars.
-
-### 4. Confirm
-
-Open: `https://virtualclinicos.vercel.app/api/v1/health`
-
-Expect: `"db":"up"`. Then sign in with `alex@virtualclinicos.com` / `demo`.
+**Redeploy** after saving.
 
 ---
 
-## Optional later
+## 4. Confirm
 
-- **Files**: replace local storage with Vercel Blob / S3 (`STORAGE_DRIVER`)  
-- **Email**: Resend/SendGrid instead of console  
-- **Jobs**: Redis + BullMQ instead of in-process
+`https://virtualclinicos.vercel.app/api/v1/health` → `"db":"up"`
+
+Login: `alex@virtualclinicos.com` / `demo`
 
 ---
 
-## Quick checklist
+## Notes
 
-- [ ] Neon Postgres created  
-- [ ] Prisma `provider = "postgresql"`  
-- [ ] `db push` + `db seed` on Neon  
-- [ ] Vercel env: `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`  
-- [ ] Redeploy  
-- [ ] `/api/v1/health` shows `db: up`
+- Aiven **Free** MySQL can sleep after inactivity — wake it in the console if health goes down.
+- Do **not** commit `.env` or passwords to GitHub.
+- If you pasted a password in chat/screenshots, **reset it** in Aiven after setup.
+- File uploads still use local disk stubs on Vercel (optional: Vercel Blob later).
