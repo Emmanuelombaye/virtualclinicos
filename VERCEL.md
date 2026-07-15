@@ -16,10 +16,12 @@ This project is configured for **MySQL** via Prisma (`provider = "mysql"`).
 3. Build:
 
 ```text
-mysql://avnadmin:YOUR_PASSWORD@YOUR_HOST:YOUR_PORT/defaultdb?sslaccept=strict
+mysql://avnadmin:YOUR_PASSWORD@YOUR_HOST:YOUR_PORT/defaultdb?sslaccept=accept_invalid_certs&connect_timeout=60
 ```
 
-Use `sslaccept=strict` (Prisma). SSL mode in the UI shows `REQUIRED` — that maps to this.
+Use the **MySQL** tab port (classic protocol), **not MySQLx**.  
+Prisma works with: `sslaccept=accept_invalid_certs&connect_timeout=60`  
+(Aiven UI shows SSL `REQUIRED`; Windows/Prisma often needs `accept_invalid_certs` unless you download the project CA.)
 
 ---
 
@@ -41,7 +43,7 @@ Project → **Settings** → **Environment Variables**:
 
 | Name | Value |
 |------|--------|
-| `DATABASE_URL` | Aiven MySQL URI (with `?sslaccept=strict`) |
+| `DATABASE_URL` | Aiven MySQL URI (with `sslaccept=accept_invalid_certs&connect_timeout=60`) |
 | `AUTH_SECRET` | Long random string |
 | `APP_URL` | `https://virtualclinicos.vercel.app` |
 | `EMAIL_DRIVER` | `console` |

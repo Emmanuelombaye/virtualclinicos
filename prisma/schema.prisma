@@ -17,9 +17,9 @@ model Organization {
   domain                   String?
   timezone                 String   @default("UTC")
   country                  String   @default("US")
-  workingHoursJson         String   @default("{\"start\":\"09:00\",\"end\":\"17:00\",\"days\":[1,2,3,4,5]}")
+  workingHoursJson         String   @db.VarChar(512) @default("{\"start\":\"09:00\",\"end\":\"17:00\",\"days\":[1,2,3,4,5]}")
   fiscalYearStartMonth     Int      @default(1)
-  notificationSettingsJson String   @default("{\"email\":true,\"inApp\":true}")
+  notificationSettingsJson String   @db.VarChar(255) @default("{\"email\":true,\"inApp\":true}")
   emailFromName            String?
   supportEmail             String?
   apiRateLimitPerMinute    Int      @default(120)
@@ -101,13 +101,13 @@ model User {
   passwordHash   String
   mfaEnabled     Boolean   @default(false)
   mfaSecret      String?
-  widgetsJson    String?
+  widgetsJson    String? @db.Text
   /// IANA timezone for digests / display (e.g. America/New_York)
   timezone       String    @default("UTC")
   /// { emailMentions, emailAssignments, emailDigest, inAppAll }
-  notificationPrefsJson String?
+  notificationPrefsJson String? @db.Text
   /// { dismissedWelcome, completedSteps: string[] }
-  onboardingJson String?
+  onboardingJson String? @db.Text
   lastActiveAt   DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -179,7 +179,7 @@ model ActivityEvent {
   entityId       String
   action         String
   summary        String
-  metadataJson   String?
+  metadataJson   String? @db.Text
   createdAt      DateTime @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -436,8 +436,8 @@ model AuditLog {
   action          String
   entityType      String
   entityId        String
-  beforeJson      String?
-  afterJson       String?
+  beforeJson      String? @db.Text
+  afterJson       String? @db.Text
   ip              String?
   createdAt       DateTime @default(now())
 
@@ -487,7 +487,7 @@ model SavedView {
   userId         String
   name           String
   entity         String
-  filterJson     String
+  filterJson     String @db.Text
   isShared       Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -506,7 +506,7 @@ model CustomFieldDef {
   key            String
   label          String
   fieldType      String   @default("text")
-  optionsJson    String?
+  optionsJson    String? @db.Text
   required       Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -576,7 +576,7 @@ model DashboardLayout {
   id             String   @id @default(cuid())
   organizationId String
   userId         String
-  widgetsJson    String   @default("[\"revenue\",\"tasks\",\"risks\",\"launches\"]")
+  widgetsJson    String   @db.VarChar(255) @default("[\"revenue\",\"tasks\",\"risks\",\"launches\"]")
   updatedAt      DateTime @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -591,8 +591,8 @@ model AutomationRule {
   organizationId String
   name           String
   trigger        String
-  conditionsJson String   @default("{}")
-  actionsJson    String
+  conditionsJson String   @db.VarChar(255) @default("{}")
+  actionsJson    String   @db.Text
   enabled        Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -609,7 +609,7 @@ model ApiKey {
   name           String
   tokenHash      String
   prefix         String
-  scopesJson     String    @default("[]")
+  scopesJson     String    @db.VarChar(2000) @default("[]")
   createdById    String
   lastUsedAt     DateTime?
   revokedAt      DateTime?
@@ -628,7 +628,7 @@ model WebhookEndpoint {
   organizationId String
   url            String
   secret         String
-  eventsJson     String
+  eventsJson     String @db.Text
   enabled        Boolean   @default(true)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -644,7 +644,7 @@ model WebhookDelivery {
   organizationId String
   endpointId     String
   event          String
-  payloadJson    String
+  payloadJson    String @db.Text
   status         String    @default("pending")
   attempts       Int       @default(0)
   lastError      String?
@@ -706,7 +706,7 @@ model EntityRevision {
   entityType     String
   entityId       String
   version        Int
-  snapshotJson   String
+  snapshotJson   String @db.Text
   actorId        String?
   createdAt      DateTime @default(now())
 
@@ -731,7 +731,7 @@ model OrgPluginInstall {
   id             String   @id @default(cuid())
   organizationId String
   pluginId       String
-  configJson     String   @default("{}")
+  configJson     String   @db.VarChar(2000) @default("{}")
   installedAt    DateTime @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
