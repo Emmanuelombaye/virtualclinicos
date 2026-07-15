@@ -1,0 +1,14 @@
+{
+  "nav.commandCenter": "Command Center",
+  "nav.clients": "Clients",
+  "nav.tasks": "Tasks",
+  "nav.calendar": "Calendar",
+  "nav.marketplace": "Marketplace",
+  "nav.settings": "Settings",
+  "nav.automations": "Automations",
+  "nav.apiKeys": "API Keys",
+  "nav.webhooks": "Webhooks",
+  "nav.flags": "Feature Flags",
+  "nav.billing": "Billing",
+  "nav.security": "Security"
+}

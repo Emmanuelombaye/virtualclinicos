@@ -1,0 +1,741 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id                       String   @id @default(cuid())
+  name                     String
+  slug                     String   @unique
+  logoFileId               String?
+  primaryColor             String?
+  domain                   String?
+  timezone                 String   @default("UTC")
+  country                  String   @default("US")
+  workingHoursJson         String   @default("{\"start\":\"09:00\",\"end\":\"17:00\",\"days\":[1,2,3,4,5]}")
+  fiscalYearStartMonth     Int      @default(1)
+  notificationSettingsJson String   @default("{\"email\":true,\"inApp\":true}")
+  emailFromName            String?
+  supportEmail             String?
+  apiRateLimitPerMinute    Int      @default(120)
+  plan                     String   @default("pro")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  users               User[]
+  roles               Role[]
+  accountExecutives   AccountExecutive[]
+  clients             Client[]
+  clientGates         ClientGate[]
+  tasks               Task[]
+  risks               Risk[]
+  comms               Comm[]
+  followUps           FollowUp[]
+  auditLogs           AuditLog[]
+  invitations         Invitation[]
+  activityEvents      ActivityEvent[]
+  comments            Comment[]
+  fileObjects         FileObject[]
+  notifications       Notification[]
+  launchTemplates     LaunchTemplate[]
+  savedViews          SavedView[]
+  customFieldDefs     CustomFieldDef[]
+  customFieldValues   CustomFieldValue[]
+  recurringTaskRules  RecurringTaskRule[]
+  aeAvailabilities    AeAvailability[]
+  dashboardLayouts    DashboardLayout[]
+  automationRules     AutomationRule[]
+  apiKeys             ApiKey[]
+  webhookEndpoints    WebhookEndpoint[]
+  webhookDeliveries   WebhookDelivery[]
+  apiUsageDaily       ApiUsageDaily[]
+  featureFlags        FeatureFlag[]
+  subscription        Subscription?
+  entityRevisions     EntityRevision[]
+  orgPluginInstalls   OrgPluginInstall[]
+}
+
+model Role {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  slug           String
+  isSystem       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  permissions  RolePermission[]
+  users        User[]
+  invitations  Invitation[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+}
+
+model RolePermission {
+  id         String @id @default(cuid())
+  roleId     String
+  permission String
+
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permission])
+  @@index([roleId])
+}
+
+model User {
+  id             String    @id @default(cuid())
+  organizationId String
+  roleId         String
+  email          String
+  name           String
+  initials       String
+  /// Links AE role users to AccountExecutive.id within the org
+  aeId           String?
+  passwordHash   String
+  mfaEnabled     Boolean   @default(false)
+  mfaSecret      String?
+  widgetsJson    String?
+  /// IANA timezone for digests / display (e.g. America/New_York)
+  timezone       String    @default("UTC")
+  /// { emailMentions, emailAssignments, emailDigest, inAppAll }
+  notificationPrefsJson String?
+  /// { dismissedWelcome, completedSteps: string[] }
+  onboardingJson String?
+  lastActiveAt   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role             Role              @relation(fields: [roleId], references: [id])
+  auditLogs        AuditLog[]
+  activityEvents   ActivityEvent[]
+  comments         Comment[]
+  commentReactions CommentReaction[]
+  uploadedFiles    FileObject[]      @relation("FileUploader")
+  deletedFiles     FileObject[]      @relation("FileDeleter")
+  notifications    Notification[]
+  invitationsSent  Invitation[]      @relation("InvitationInviter")
+  savedViews       SavedView[]
+  dashboardLayouts DashboardLayout[]
+  apiKeys          ApiKey[]
+  entityRevisions  EntityRevision[]
+  passwordResets   PasswordResetToken[]
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+  @@index([email])
+  @@index([roleId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([userId])
+}
+
+model Invitation {
+  id             String    @id @default(cuid())
+  organizationId String
+  email          String
+  roleId         String
+  aeId           String?
+  tokenHash      String
+  invitedById    String
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role         Role         @relation(fields: [roleId], references: [id])
+  invitedBy    User         @relation("InvitationInviter", fields: [invitedById], references: [id])
+
+  @@index([organizationId])
+  @@index([tokenHash])
+  @@index([email])
+}
+
+model ActivityEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  actorUserId    String?
+  clientId       Int?
+  entityType     String
+  entityId       String
+  action         String
+  summary        String
+  metadataJson   String?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([clientId, createdAt])
+  @@index([entityType, entityId])
+}
+
+model Comment {
+  id             String    @id @default(cuid())
+  organizationId String
+  authorId       String
+  entityType     String
+  entityId       String
+  clientId       Int?
+  parentId       String?
+  body           String
+  deletedAt      DateTime?
+  deletedById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  author       User              @relation(fields: [authorId], references: [id])
+  parent       Comment?          @relation("CommentThread", fields: [parentId], references: [id])
+  replies      Comment[]         @relation("CommentThread")
+  reactions    CommentReaction[]
+  files        FileObject[]
+
+  @@index([organizationId])
+  @@index([entityType, entityId])
+  @@index([clientId])
+  @@index([parentId])
+}
+
+model CommentReaction {
+  id        String   @id @default(cuid())
+  commentId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId, emoji])
+  @@index([commentId])
+}
+
+model FileObject {
+  id             String    @id @default(cuid())
+  organizationId String
+  uploadedById   String
+  name           String
+  mimeType       String
+  sizeBytes      Int
+  storageKey     String
+  entityType     String?
+  entityId       String?
+  clientId       Int?
+  commentId      String?
+  deletedAt      DateTime?
+  deletedById    String?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  uploadedBy   User         @relation("FileUploader", fields: [uploadedById], references: [id])
+  deletedBy    User?        @relation("FileDeleter", fields: [deletedById], references: [id])
+  comment      Comment?     @relation(fields: [commentId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([entityType, entityId])
+  @@index([clientId])
+  @@index([storageKey])
+}
+
+model Notification {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  type           String
+  title          String
+  body           String
+  href           String?
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([organizationId])
+  @@index([readAt])
+}
+
+model AccountExecutive {
+  organizationId String
+  id             String
+  name           String
+  initials       String
+  capacityLoad   Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  clients      Client[]
+  availability AeAvailability[]
+
+  @@id([organizationId, id])
+  @@index([organizationId])
+}
+
+model Client {
+  id              Int       @id @default(autoincrement())
+  organizationId  String
+  name            String
+  aeId            String
+  phase           Int
+  status          String    @default("Active")
+  health          String    @default("green")
+  daysToLaunch    Int
+  mrr             Int       @default(0)
+  waitingOn       String    @default("Nothing")
+  waitDays        Int       @default(0)
+  criticalOverdue Int       @default(0)
+  version         Int       @default(1)
+  deletedAt       DateTime?
+  deletedById     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ae           AccountExecutive @relation(fields: [organizationId, aeId], references: [organizationId, id])
+  gates        ClientGate[]
+  tasks        Task[]
+  risks        Risk[]
+  comms        Comm[]
+  followUps    FollowUp[]
+
+  @@index([organizationId])
+  @@index([organizationId, aeId])
+  @@index([organizationId, health])
+  @@index([organizationId, phase])
+  @@index([deletedAt])
+}
+
+model ClientGate {
+  id             String   @id @default(cuid())
+  organizationId String
+  clientId       Int
+  name           String
+  phase          Int
+  critical       Boolean  @default(false)
+  ownerType      String
+  status         String   @default("Not Started")
+  version        Int      @default(1)
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, name])
+  @@index([organizationId])
+  @@index([clientId])
+  @@index([status])
+}
+
+model Task {
+  id             String    @id @default(cuid())
+  organizationId String
+  clientId       Int
+  title          String
+  priority       String
+  status         String
+  owner          String
+  due            String
+  version        Int       @default(1)
+  deletedAt      DateTime?
+  deletedById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([clientId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model Risk {
+  id             String    @id @default(cuid())
+  organizationId String
+  clientId       Int
+  title          String
+  type           String
+  severity       String
+  status         String
+  version        Int       @default(1)
+  deletedAt      DateTime?
+  deletedById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([clientId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model Comm {
+  id             String   @id @default(cuid())
+  organizationId String
+  clientId       Int
+  subject        String
+  channel        String
+  whenLabel      String
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([clientId])
+}
+
+model FollowUp {
+  id             String   @id @default(cuid())
+  organizationId String
+  clientId       Int
+  note           String
+  due            String
+  tone           String
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([clientId])
+}
+
+model AuditLog {
+  id              String   @id @default(cuid())
+  organizationId  String
+  actorUserId     String?
+  impersonatorId  String?
+  action          String
+  entityType      String
+  entityId        String
+  beforeJson      String?
+  afterJson       String?
+  ip              String?
+  createdAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([entityType, entityId])
+  @@index([actorUserId])
+}
+
+model LaunchTemplate {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  slug           String
+  description    String?
+  defaultMrr     Int      @default(0)
+  daysToLaunch   Int      @default(90)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gates        LaunchTemplateGate[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+}
+
+model LaunchTemplateGate {
+  id         String  @id @default(cuid())
+  templateId String
+  name       String
+  phase      Int
+  critical   Boolean @default(false)
+  ownerType  String  @default("AE")
+  sortOrder  Int     @default(0)
+
+  template LaunchTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+}
+
+model SavedView {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  name           String
+  entity         String
+  filterJson     String
+  isShared       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model CustomFieldDef {
+  id             String   @id @default(cuid())
+  organizationId String
+  entityType     String
+  key            String
+  label          String
+  fieldType      String   @default("text")
+  optionsJson    String?
+  required       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  values       CustomFieldValue[]
+
+  @@unique([organizationId, entityType, key])
+  @@index([organizationId])
+}
+
+model CustomFieldValue {
+  id             String   @id @default(cuid())
+  organizationId String
+  fieldDefId     String
+  entityType     String
+  entityId       String
+  valueText      String?
+  updatedAt      DateTime @updatedAt
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fieldDef     CustomFieldDef @relation(fields: [fieldDefId], references: [id], onDelete: Cascade)
+
+  @@unique([fieldDefId, entityType, entityId])
+  @@index([organizationId])
+  @@index([entityType, entityId])
+}
+
+model RecurringTaskRule {
+  id             String    @id @default(cuid())
+  organizationId String
+  clientId       Int?
+  title          String
+  priority       String    @default("Medium")
+  owner          String
+  cadence        String
+  nextRunAt      DateTime?
+  enabled        Boolean   @default(true)
+  lastRunAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([enabled, nextRunAt])
+}
+
+model AeAvailability {
+  id             String    @id @default(cuid())
+  organizationId String
+  aeId           String
+  vacationStart  DateTime?
+  vacationEnd    DateTime?
+  capacityOverride Int?
+  notes          String?
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ae           AccountExecutive @relation(fields: [organizationId, aeId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, aeId])
+  @@index([organizationId])
+}
+
+model DashboardLayout {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  widgetsJson    String   @default("[\"revenue\",\"tasks\",\"risks\",\"launches\"]")
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@index([organizationId])
+}
+
+model AutomationRule {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  trigger        String
+  conditionsJson String   @default("{}")
+  actionsJson    String
+  enabled        Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([trigger, enabled])
+}
+
+model ApiKey {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  tokenHash      String
+  prefix         String
+  scopesJson     String    @default("[]")
+  createdById    String
+  lastUsedAt     DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation(fields: [createdById], references: [id])
+
+  @@index([organizationId])
+  @@index([tokenHash])
+  @@index([prefix])
+}
+
+model WebhookEndpoint {
+  id             String    @id @default(cuid())
+  organizationId String
+  url            String
+  secret         String
+  eventsJson     String
+  enabled        Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deliveries   WebhookDelivery[]
+
+  @@index([organizationId])
+}
+
+model WebhookDelivery {
+  id             String    @id @default(cuid())
+  organizationId String
+  endpointId     String
+  event          String
+  payloadJson    String
+  status         String    @default("pending")
+  attempts       Int       @default(0)
+  lastError      String?
+  deliveredAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  endpoint     WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([endpointId])
+  @@index([status])
+}
+
+model ApiUsageDaily {
+  id             String @id @default(cuid())
+  organizationId String
+  day            String
+  route          String
+  count          Int    @default(0)
+  errors         Int    @default(0)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, day, route])
+  @@index([organizationId, day])
+}
+
+model FeatureFlag {
+  id             String   @id @default(cuid())
+  organizationId String?
+  key            String
+  enabled        Boolean  @default(false)
+  description    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, key])
+  @@index([key])
+}
+
+model Subscription {
+  id             String   @id @default(cuid())
+  organizationId String   @unique
+  plan           String   @default("pro")
+  status         String   @default("active")
+  seats          Int      @default(25)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model EntityRevision {
+  id             String   @id @default(cuid())
+  organizationId String
+  entityType     String
+  entityId       String
+  version        Int
+  snapshotJson   String
+  actorId        String?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, entityType, entityId])
+}
+
+model Plugin {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  category    String   @default("integration")
+  createdAt   DateTime @default(now())
+
+  installs OrgPluginInstall[]
+}
+
+model OrgPluginInstall {
+  id             String   @id @default(cuid())
+  organizationId String
+  pluginId       String
+  configJson     String   @default("{}")
+  installedAt    DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plugin       Plugin       @relation(fields: [pluginId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, pluginId])
+  @@index([organizationId])
+}
