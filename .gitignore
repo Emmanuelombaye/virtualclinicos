@@ -31,8 +31,6 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env
-.env.local
 .env.*.local
 !.env.example
 
@@ -53,3 +51,4 @@ next-env.d.ts
 # smoke / local secrets
 .smoke-api-key
 /reports/
+config.bat
