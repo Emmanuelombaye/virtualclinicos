@@ -43,7 +43,7 @@ export async function loginAction(formData: FormData) {
     return {
       ok: false as const,
       error:
-        "Sign-in failed — database is unavailable. On Vercel, set a Postgres DATABASE_URL (see VERCEL.md).",
+        "Sign-in failed — database is unavailable. On Vercel, set a MySQL DATABASE_URL (see VERCEL.md).",
     };
   }
 }
