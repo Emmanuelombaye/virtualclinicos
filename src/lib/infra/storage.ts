@@ -76,15 +76,36 @@ export class LocalStorageProvider implements StorageProvider {
   }
 }
 
+/** Used on Vercel / read-only FS when local mkdir is not allowed. */
+export class NoopStorageProvider implements StorageProvider {
+  async put(): Promise<StoredObject> {
+    throw new Error(
+      "File storage is not configured on this host. Set cloud storage (see VERCEL.md).",
+    );
+  }
+  async getStream(): Promise<Readable> {
+    throw new Error("File storage is not configured on this host.");
+  }
+  async delete(): Promise<void> {
+    /* no-op */
+  }
+  async signedUrl(storageKey: string): Promise<string> {
+    return `/api/v1/files/download?key=${encodeURIComponent(storageKey)}`;
+  }
+}
+
 let singleton: StorageProvider | null = null;
 
 export function getStorageProvider(): StorageProvider {
   if (singleton) return singleton;
-  const driver = process.env.STORAGE_DRIVER ?? "local";
-  if (driver === "local") {
+  try {
     singleton = new LocalStorageProvider();
-  } else {
-    singleton = new LocalStorageProvider();
+  } catch (err) {
+    console.warn(
+      "[storage] Local disk unavailable — using noop provider:",
+      err instanceof Error ? err.message : err,
+    );
+    singleton = new NoopStorageProvider();
   }
   return singleton;
 }

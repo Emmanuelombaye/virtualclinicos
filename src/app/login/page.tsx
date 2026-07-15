@@ -1,6 +1,7 @@
 import { Logo } from "@/components/brand/Logo";
 import { DEMO_LOGIN_HINTS } from "@/lib/auth/users";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { DbStatusBanner } from "@/components/auth/DbStatusBanner";
 
 export default async function LoginPage({
   searchParams,
@@ -20,6 +21,7 @@ export default async function LoginPage({
         <p className="mt-1 text-center text-sm text-vco-muted">
           Demo password for all accounts: <b>demo</b>
         </p>
+        <DbStatusBanner />
         {sp.reset ? (
           <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-800">
             Password updated — sign in with your new password.

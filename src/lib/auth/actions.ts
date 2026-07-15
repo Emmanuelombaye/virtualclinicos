@@ -12,21 +12,40 @@ import {
 } from "@/lib/services/password";
 
 export async function loginAction(formData: FormData) {
-  const email = z.string().email().parse(String(formData.get("email") ?? ""));
-  const password = z.string().parse(String(formData.get("password") ?? ""));
-  const normalized = email.trim().toLowerCase();
+  try {
+    const email = z.string().email().parse(String(formData.get("email") ?? ""));
+    const password = z.string().parse(String(formData.get("password") ?? ""));
+    const normalized = email.trim().toLowerCase();
 
-  const users = await prisma.user.findMany({
-    include: { role: { select: { slug: true } } },
-  });
-  const found = users.find((u) => u.email.toLowerCase() === normalized);
+    const users = await prisma.user.findMany({
+      include: { role: { select: { slug: true } } },
+    });
+    const found = users.find((u) => u.email.toLowerCase() === normalized);
 
-  if (!found || !(await bcrypt.compare(password, found.passwordHash))) {
-    return { ok: false as const, error: "Invalid email or password" };
+    if (!found || !(await bcrypt.compare(password, found.passwordHash))) {
+      return { ok: false as const, error: "Invalid email or password" };
+    }
+
+    await createSession(found.id);
+    redirect(found.role.slug === "ae" ? "/ae-dashboard" : "/command-center");
+  } catch (e) {
+    // Next.js redirect() throws; rethrow so navigation works
+    if (
+      e &&
+      typeof e === "object" &&
+      "digest" in e &&
+      typeof (e as { digest?: unknown }).digest === "string" &&
+      String((e as { digest: string }).digest).startsWith("NEXT_REDIRECT")
+    ) {
+      throw e;
+    }
+    console.error("[loginAction]", e);
+    return {
+      ok: false as const,
+      error:
+        "Sign-in failed — database is unavailable. On Vercel, set a Postgres DATABASE_URL (see VERCEL.md).",
+    };
   }
-
-  await createSession(found.id);
-  redirect(found.role.slug === "ae" ? "/ae-dashboard" : "/command-center");
 }
 
 export async function logoutAction() {

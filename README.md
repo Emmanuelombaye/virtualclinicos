@@ -100,6 +100,8 @@ Conventions: Zod validation → `requirePermission` → Prisma → audit/activit
 
 ## Vercel / production notes
 
+See **[VERCEL.md](./VERCEL.md)** for the exact fix when login shows a server error (`db: down`).
+
 The codebase is **Next.js App Router** and builds cleanly for Vercel (`Root Directory` = repo root if this package is the repo root).
 
 **Do not use SQLite on Vercel** — use managed **Postgres** (Neon, Supabase, Vercel Postgres):
