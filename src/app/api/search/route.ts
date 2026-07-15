@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getSessionUser } from "@/lib/auth/session";
+import { resolveAuth } from "@/lib/auth/api-key";
 import {
   clientVisibilityWhere,
   hasPermission,
 } from "@/lib/auth/permissions";
 
 export async function GET(req: NextRequest) {
-  const user = await getSessionUser();
-  if (!user) {
+  let user;
+  try {
+    user = await resolveAuth(req);
+  } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

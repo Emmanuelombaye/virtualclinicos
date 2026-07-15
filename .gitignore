@@ -49,3 +49,7 @@ next-env.d.ts
 
 # local file uploads
 /storage
+
+# smoke / local secrets
+.smoke-api-key
+/reports/

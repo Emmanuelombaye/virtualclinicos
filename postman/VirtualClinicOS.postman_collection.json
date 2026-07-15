@@ -1,0 +1,554 @@
+{
+  "info": {
+    "name": "VirtualClinicOS API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Live smoke collection. Set collection vars baseUrl + apiKey."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://virtualclinicos.vercel.app"
+    },
+    {
+      "key": "apiKey",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "GET /api/v1/health",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/health"
+      }
+    },
+    {
+      "name": "GET /login",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/login"
+      }
+    },
+    {
+      "name": "GET /forgot-password",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/forgot-password"
+      }
+    },
+    {
+      "name": "GET /api/auth/sso/google/start",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/sso/google/start"
+      }
+    },
+    {
+      "name": "GET /api/auth/sso/microsoft/start",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/sso/microsoft/start"
+      }
+    },
+    {
+      "name": "GET /api/v1/me",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/me"
+      }
+    },
+    {
+      "name": "GET /api/v1/organization",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/organization"
+      }
+    },
+    {
+      "name": "GET /api/v1/clients",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/clients"
+      }
+    },
+    {
+      "name": "GET /api/v1/tasks",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/tasks"
+      }
+    },
+    {
+      "name": "GET /api/v1/templates",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/templates"
+      }
+    },
+    {
+      "name": "GET /api/v1/notifications",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/notifications"
+      }
+    },
+    {
+      "name": "GET /api/v1/views",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/views"
+      }
+    },
+    {
+      "name": "GET /api/v1/custom-fields",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/custom-fields"
+      }
+    },
+    {
+      "name": "GET /api/v1/automations",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/automations"
+      }
+    },
+    {
+      "name": "GET /api/v1/api-keys",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/api-keys"
+      }
+    },
+    {
+      "name": "GET /api/v1/webhooks",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/webhooks"
+      }
+    },
+    {
+      "name": "GET /api/v1/flags",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/flags"
+      }
+    },
+    {
+      "name": "GET /api/v1/billing",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/billing"
+      }
+    },
+    {
+      "name": "GET /api/v1/workload",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/workload"
+      }
+    },
+    {
+      "name": "GET /api/v1/calendar",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/calendar"
+      }
+    },
+    {
+      "name": "GET /api/v1/metrics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/metrics"
+      }
+    },
+    {
+      "name": "GET /api/v1/plugins",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/plugins"
+      }
+    },
+    {
+      "name": "GET /api/v1/invitations",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/invitations"
+      }
+    },
+    {
+      "name": "GET /api/v1/dashboard-layout",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/dashboard-layout"
+      }
+    },
+    {
+      "name": "GET /api/v1/files",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/files"
+      }
+    },
+    {
+      "name": "GET /api/v1/exports/clients",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/exports/clients"
+      }
+    },
+    {
+      "name": "GET /api/v1/audit/export",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/audit/export"
+      }
+    },
+    {
+      "name": "GET /api/search?q=clinic",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/search?q=clinic"
+      }
+    },
+    {
+      "name": "GET /api/v1/presence?clientId=1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/presence?clientId=1"
+      }
+    },
+    {
+      "name": "GET /api/v1/comments?entityType=Client&entityId=1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/comments?entityType=Client&entityId=1"
+      }
+    },
+    {
+      "name": "GET /api/v1/clients/1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/clients/1"
+      }
+    },
+    {
+      "name": "POST /api/v1/presence",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/presence",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientId\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "PATCH /api/v1/notifications",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/notifications",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "POST /api/v1/jobs/recurring-tick",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/jobs/recurring-tick",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "POST /api/v1/billing/checkout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/billing/checkout",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"plan\": \"pro\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "POST /api/v1/settings/mfa",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/settings/mfa",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"enabled\": false,\n  \"code\": \"000000\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "POST /api/v1/ai/summarize-launch",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/ai/summarize-launch",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientId\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

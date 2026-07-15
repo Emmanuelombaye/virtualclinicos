@@ -10,6 +10,7 @@ const PUBLIC_PREFIXES = [
   "/api/v1/health",
   "/invite",
   "/api/v1/invitations/accept",
+  "/api/auth/sso/",
 ];
 
 function secretKey() {
