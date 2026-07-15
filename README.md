@@ -98,21 +98,16 @@ Conventions: Zod validation → `requirePermission` → Prisma → audit/activit
 
 ---
 
-## Vercel / production notes
-
 See **[VERCEL.md](./VERCEL.md)** for the exact fix when login shows a server error (`db: down`).
 
-The codebase is **Next.js App Router** and builds cleanly for Vercel (`Root Directory` = repo root if this package is the repo root).
-
-**Do not use SQLite on Vercel** — use managed **Postgres** (Neon, Supabase, Vercel Postgres):
-
-1. Set Prisma `datasource` provider to `postgresql`
-2. Set `DATABASE_URL` (and usually `DIRECT_URL` for migrations)
-3. Swap local file storage for **Vercel Blob / S3**
+**Do not use SQLite on Vercel.** Use managed MySQL (Aiven Free) or Postgres (Neon). Then:
+1. Set Prisma `provider` to `mysql` or `postgresql`
+2. Set `DATABASE_URL` (and usually `DIRECT_URL` for migrations if needed)
+3. Optionally swap local file storage for **Vercel Blob / S3**
 4. Set strong `AUTH_SECRET` and real `APP_URL`
 5. Wire a real email provider (Resend/SendGrid) when leaving console driver
 
-Local SQLite + console email remain ideal for demos.
+Local demos can still use SQLite + console email until you cut over.
 
 ---
 
